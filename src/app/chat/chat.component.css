@@ -1,3 +1,7 @@
+.chat-container {
+    width: 200px;
+}
+
 .message-form {
     margin: 1px;
     display: flex;
@@ -11,6 +15,11 @@
     background-color: linen;
     border-radius: 2%;
     word-break: break-all;
+    text-align: left;
+}
+
+.sender-name {
+    color: #A0615F;
 }
 
 .message {

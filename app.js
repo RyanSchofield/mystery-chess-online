@@ -9,7 +9,7 @@ const Express = require("express")().use(Cors);
 const Http = require("http").Server(Express);
 const Socketio = require("socket.io")(Http, {
     cors: {
-      origin: "http://192.168.1.2:4200",
+      origin: "*",
       methods: ["GET", "POST"]
     }
   });
@@ -21,13 +21,13 @@ Http.listen(3000, () => {
 var player1;
 var player2;
 var spectators = [];
+var numSpectators = 0;
 
 var mostRecentData;
 var messages = [];
 
 Socketio.on("connection", socket => {
     // console.log('connection');
-    // socket.emit("hello", 'hello world');
     let socketStatus;
 
     socket.emit("messages", {
@@ -41,27 +41,31 @@ Socketio.on("connection", socket => {
 
         socket.emit("setPlayerStatus", {
             color: 1,
-            isSpectator: false
+            isSpectator: false,
+            spectatorNumber: -1,
         });
         socket.emit("moveUpdate", mostRecentData);
     } else if (!player2) {
         socketStatus = 'player2';
-        console.log('player 2 connected');
+        console.log('player 2 connected');        
 
         player2 = socket;
         socket.emit("setPlayerStatus", {
             color: 0,
-            isSpectator: false
+            isSpectator: false,
+            spectatorNumber: -1,
         });
         socket.emit("moveUpdate", mostRecentData);
     } else {
         spectators.push(socket);
         socketStatus = 'spectator';
+        numSpectators++;
         console.log('spectator connected');
 
         socket.emit("setPlayerStatus", {
             color: Math.floor(Math.random()),
-            isSpectator: true
+            isSpectator: true,
+            spectatorNumber: numSpectators,
         });
         socket.emit("moveUpdate", mostRecentData);
     }
@@ -89,10 +93,12 @@ Socketio.on("connection", socket => {
         if (socket == player1 || socketStatus == 'player1') {
             console.log('player 1 disconnected');
             player1 = null;
-        }
-        if (socket == player2 || socketStatus == 'player1') {
+        } else if (socket == player2 || socketStatus == 'player2') {
             console.log('player 2 disconnected');
             player2 = null;
+        } else {
+            console.log('spectator disconnected');
+            numSpectators--;
         }
 
         if (player1 === null && player2 === null) {

@@ -10,7 +10,7 @@ export class ChatComponent implements OnInit {
   public currentMessage?: string;
   // public username: string = 'test';
 
-  @Input() username: string = '';
+  @Input() username?: string;
 
   @Input() socket: any;
 
